@@ -1,0 +1,7 @@
+// Welcome to the stream! 
+
+// Today we'll be building a YT Telegram BOT!
+
+// This will most-likely be a multi-part series with 2-3parts. 
+
+// So let's have fun!
