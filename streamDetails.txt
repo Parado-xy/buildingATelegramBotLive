@@ -5,3 +5,5 @@
 // This will most-likely be a multi-part series with 2-3parts. 
 
 // So let's have fun!
+
+curl -F "url=https://buildingatelegrambotlive.onrender.com/bot/message/new-message"  https://api.telegram.org/bot7828660251:AAGAUoji46BxC4pg3yJeb2AAc2HRLmGlYUM/setWebhook
