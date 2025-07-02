@@ -29,70 +29,72 @@ messageRouter.post(`/new-message`, async (req, res, next) => {
 
         //Each message contains "text" and a "chat" object, which has an "id" which is the chat id
 
-        if (!message) {
+        if (!message || !message.from || !message.from.username) {
           return res.end();
         }
 
         // To see the structure of the message. 
-        console.log(`message: ${message}`);  
+        console.log(`message: ${JSON.stringify(message)}`);  
 
         // Check if the user exists; 
-        const BOT_USER = TelegramBOTUser.findOne({
+        const botUser = await TelegramBOTUser.findOne({
           username: message.from.username
         }); 
 
-        await sendMessage(BOT_USER, message)
-
-
+        await sendMessage(botUser, message, res, next);
 
     }catch(error){
-        // next(error); 
+        next(error); 
     }
 })
 
 
 /**
  * This sends a message to the user depending on if they are new or not. 
- * @param {bool} */ 
-async function sendMessage(isNewUser, message){
+ * @param {object | null} botUser
+ * @param {object} message
+ * @param {import("express").Response} res
+ * @param {import("express").NextFunction} next
+ * */ 
+async function sendMessage(botUser, message, res, next){
+  const isNewUser = !botUser;
   if(isNewUser){
+    try {
+      await TelegramBOTUser.create(
+        {
+          username: message.from.username,
+          telegram_id: message.from.id
+        }
+      )
+  
+      await axios.post(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
+          chat_id: message.chat.id,
+          text: `Welcome to the service ${message.from.username}`,
+        });
+      
+      // We get here if the message was successfully posted
+      console.log("Welcome message posted");
+      res.end("ok");
 
-    await TelegramBOTUser.create(
-      {
-        username: message.from.username,
-        telegram_id: message.from.id
-      }
-    )
-
-    axios
-      .post(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
-        chat_id: message.chat.id,
-        text: `Welcome to the service ${message.from.username}`,
-      })
-      .then((response) => {
-        // We get here if the message was successfully posted
-        console.log("Message posted");
-        res.end("ok");
-      })
-      .catch((error) => {
-        console.error("Failed to send message:", error);
-        // next(error);
-      });
+    } catch (error) {
+      console.error("Failed to send welcome message:", error);
+      next(error);
+    }
   }else{
     // If not a new user, send this message. 
-    axios
-      .post(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
+    try {
+      await axios.post(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
         chat_id: message.chat.id,
         text: `Welcome back ${message.from.username}!`,
-      })
-      .then((response) => {
-        // We get here if the message was successfully posted
-        console.log("Message posted");
-        res.end("ok");
-      })
-      .catch((error) => {
-        console.error("Failed to send message:", error);
-        // next(error);
       });
+      
+      // We get here if the message was successfully posted
+      console.log("Welcome back message posted");
+      res.end("ok");
+
+    } catch (error) {
+      console.error("Failed to send welcome back message:", error);
+      next(error);
+    }
   }
 }
