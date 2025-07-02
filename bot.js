@@ -18,9 +18,9 @@ server.use(express.urlencoded({extended: true}));
 // use the dispatcher for routes management. 
 dispatcher(server); 
 
-const port = procees.env.PORT || 3000; 
+const port = 8443; 
 
 // Make the server listen on a port. 
 server.listen(port, ()=> {
-    console.log(`BOT Server live on port :{3000} `); 
+    console.log(`BOT Server live on port :{PORT} `); 
 })

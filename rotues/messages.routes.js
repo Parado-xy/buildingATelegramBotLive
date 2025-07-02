@@ -41,9 +41,9 @@ messageRouter.post(`/new-message`, async (req, res, next) => {
           })
           .catch((error) => {
             console.error("Failed to send message:", error);
-            next(error);
+            // next(error);
           });
     }catch(error){
-        next(error); 
+        // next(error); 
     }
 })
