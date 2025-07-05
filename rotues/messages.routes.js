@@ -13,9 +13,8 @@ export default messageRouter;
 // Import the user schema. 
 import TelegramBOTUser from "../models/user.model.js";
 
-// TOP LEVELL CONSTANTS
-const BOT_TOKEN =
-  process.env.BOT_TOKEN || "7828660251:AAGAUoji46BxC4pg3yJeb2AAc2HRLmGlYUM";
+import { BOT_TOKEN, BASE_BOT_URL } from "../env.js";
+import { commandMessage, commands } from "../autoreplies.js";
 
 
 // attach a message route. 
@@ -23,25 +22,26 @@ messageRouter.post(`/new-message`, async (req, res, next) => {
     try{
         const { message } = req.body;
 
-        // Let's actually log the request body
-        console.log(req.body); 
-
-
         //Each message contains "text" and a "chat" object, which has an "id" which is the chat id
-
         if (!message || !message.from || !message.from.username) {
           return res.end();
         }
 
-        // To see the structure of the message. 
-        console.log(`message: ${JSON.stringify(message)}`);  
+        // Check if the message is the start command, if it's not, return. 
+        console.log( message.text.split(" "))
+        if(!isCommand(commands, message.text.split(" ")[0])){
+          return res.end();  
+        }
+
 
         // Check if the user exists; 
         const botUser = await TelegramBOTUser.findOne({
           username: message.from.username
         }); 
 
-        await sendMessage(botUser, message, res, next);
+        // Send the welcome message. 
+        await sendMessage(botUser, message, "Markdown", res, next);
+
 
     }catch(error){
         next(error); 
@@ -53,12 +53,15 @@ messageRouter.post(`/new-message`, async (req, res, next) => {
  * This sends a message to the user depending on if they are new or not. 
  * @param {object | null} botUser
  * @param {object} message
+ * @param {string} [parse_mode="text"] 
  * @param {import("express").Response} res
  * @param {import("express").NextFunction} next
  * */ 
-async function sendMessage(botUser, message, res, next){
+async function sendMessage(botUser, message, parse_mode="text", res, next){
+  // If botUser is Null, means we have a new user. 
   const isNewUser = !botUser;
   if(isNewUser){
+    // so we create an account for the user. 
     try {
       await TelegramBOTUser.create(
         {
@@ -67,9 +70,10 @@ async function sendMessage(botUser, message, res, next){
         }
       )
   
-      await axios.post(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
+      await axios.post(`${BASE_BOT_URL}${BOT_TOKEN}/sendMessage`, {
           chat_id: message.chat.id,
-          text: `Welcome to the service ${message.from.username}`,
+          text: `Welcome to the service ${message.from.username}\n${commandMessage}`,
+          parse_mode
         });
       
       // We get here if the message was successfully posted
@@ -83,9 +87,10 @@ async function sendMessage(botUser, message, res, next){
   }else{
     // If not a new user, send this message. 
     try {
-      await axios.post(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
+      await axios.post(`${BASE_BOT_URL}${BOT_TOKEN}/sendMessage`, {
         chat_id: message.chat.id,
-        text: `Welcome back ${message.from.username}!`,
+        text: `Welcome back ${message.from.username}!\n${commandMessage}`,
+        parse_mode
       });
       
       // We get here if the message was successfully posted
@@ -97,4 +102,13 @@ async function sendMessage(botUser, message, res, next){
       next(error);
     }
   }
+}
+
+/**
+ * 
+ * @param {String[]} commandMessage 
+ * @param {String} userInput 
+ */
+function isCommand(commandMessage, userInput){
+  return commandMessage.includes(userInput.toLowerCase().trim())
 }

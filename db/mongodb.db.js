@@ -1,14 +1,12 @@
 import mongoose from "mongoose";
+import { MONGODB_URI } from "../env.js";
 
 // MongoDB connection configuration
 const connectDB = async () => {
     try {
-        // MongoDB connection string - you can use environment variable
-        const mongoURI = process.env.MONGODB_URI || 'mongodb://localhost:27017/telegram_bot';
-        
-        
+                console.log(MONGODB_URI)
         // Connect to MongoDB
-        const conn = await mongoose.connect(mongoURI);
+        const conn = await mongoose.connect(MONGODB_URI);
         
         console.log(`MongoDB Connected: ${conn.connection.host}`);
         
