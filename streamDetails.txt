@@ -1,9 +1,13 @@
 // Welcome to the stream! 
 
-// Today we'll be building a YT Telegram BOT!
+// YT API Integration. 
+// Command Handling 
+// switching to ngrok -> Render wasn't too nice.  [✅]
 
-// This will most-likely be a multi-part series with 2-3parts. 
+// A webhook. 
 
-// So let's have fun!
 
-curl -F "url=https://buildingatelegrambotlive.onrender.com/bot/message/new-message"  https://api.telegram.org/bot7828660251:AAGAUoji46BxC4pg3yJeb2AAc2HRLmGlYUM/setWebhook
+// Telegram bots can only use about 3 ports; 
+// -> github.com/Parado-xy/buildingATelegramBotLive
+
+curl -F "url=https://3f14-76-78-86-7.ngrok-free.app/bot/message/new-message"  https://api.telegram.org/bot7846145373:AAEKz5hEFLqV4bFUeL4Y3V0F_nK_10aqzTo/setWebhook

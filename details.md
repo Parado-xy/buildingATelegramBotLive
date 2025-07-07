@@ -20,7 +20,7 @@
       type: 'private'
     },
     date: 1751389541,
-    text: 'Code'
+    text: 'Code' // "/command <Value>"
   }
 }
 ```
